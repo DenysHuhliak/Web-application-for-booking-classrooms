@@ -1,0 +1,27 @@
+<header class="pnu-header">
+  <div class="header-top-bar">
+    <div class="uni-title-block">
+      <h1>Карпатський національний університет імені Василя Стефаника</h1>
+      <p class="subtitle">Вебзастосунок для бронювання навчальних аудиторій</p>
+    </div>
+
+    <div class="user-profile-box">
+      <div id="guest-panel" style="display: flex; align-items: center; gap: 8px;">
+        <span style="color: #cfe2f3;">Гість</span>
+        <button type="button" id="open-login-btn" class="btn-action-sm btn-book">Увійти</button>
+        <button type="button" id="open-register-btn" class="btn-secondary-sm">Реєстрація</button>
+      </div>
+
+      <div id="user-panel" class="hidden" style="display: flex; align-items: center; gap: 10px;">
+        <span>Профіль: <strong id="active-user-name" style="color: #fff;"></strong></span>
+        <span id="active-user-role-badge" class="system-badge" style="margin: 0;"></span>
+        <button type="button" id="logout-btn" class="btn-secondary-sm" style="color: #721c24; background: #f8d7da; border-color: #f5c6cb;">Вийти</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="header-nav">
+    <button id="nav-map-btn" class="nav-link active" type="button">Пошук аудиторій</button>
+    <button type="button" id="nav-bookings-btn" class="nav-link" type="button">Мої бронювання та черга</button>
+  </nav>
+</header>

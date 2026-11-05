@@ -1,0 +1,61 @@
+<div id="auth-modal" class="modal-backdrop hidden">
+  <div class="modal-window" style="max-width: 460px;">
+    <div class="modal-header">
+      <h3 id="auth-modal-title">Автентифікація в системі КНУ</h3>
+      <button type="button" id="auth-close-btn" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; gap: 6px; border-bottom: 1px solid #dee2e6; padding-bottom: 10px;">
+        <button type="button" id="tab-login-btn" class="btn-primary-pnu" style="flex: 1; padding: 6px;">Вхід</button>
+        <button type="button" id="tab-register-btn" class="btn-outline-pnu" style="flex: 1; padding: 6px;">Реєстрація</button>
+      </div>
+
+      <form id="login-form" class="booking-form">
+        <div class="form-group">
+          <label for="login-email">Корпоративна пошта: *</label>
+          <input type="email" id="login-email" class="pnu-input" placeholder="name@pnu.edu.ua" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Пароль: *</label>
+          <input type="password" id="login-password" class="pnu-input" placeholder="Введіть пароль" required />
+        </div>
+
+        <small id="login-error-msg" class="error-text hidden"></small>
+
+        <div class="modal-footer-btns">
+          <button type="button" id="login-cancel-btn" class="btn-outline-pnu">Скасувати</button>
+          <button type="submit" class="btn-primary-pnu">Увійти</button>
+        </div>
+      </form>
+
+      <form id="register-form" class="booking-form hidden">
+        <div class="form-group">
+          <label for="reg-fullname">Повне ім'я: *</label>
+          <input type="text" id="reg-fullname" class="pnu-input" placeholder="Наприклад: Пікуляк Микола Васильович" required />
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Корпоративна пошта: *</label>
+          <input type="email" id="reg-email" class="pnu-input" placeholder="name@pnu.edu.ua" required />
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Пароль (щонайменше 8 символів): *</label>
+          <input type="password" id="reg-password" class="pnu-input" placeholder="Введіть пароль" required />
+        </div>
+        <div class="form-group">
+          <label for="reg-role">Категорія користувача: *</label>
+          <select id="reg-role" class="pnu-input">
+            <option value="student">Студент</option>
+            <option value="teacher">Викладач</option>
+          </select>
+        </div>
+
+        <small id="reg-error-msg" class="error-text hidden"></small>
+
+        <div class="modal-footer-btns">
+          <button type="button" id="register-cancel-btn" class="btn-outline-pnu">Скасувати</button>
+          <button type="submit" class="btn-primary-pnu">Зареєструватися</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

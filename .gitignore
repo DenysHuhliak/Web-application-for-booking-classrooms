@@ -1,0 +1,16 @@
+.env
+.env.*
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+.venv/
+env/
+booking_system.db
+*.db
+*.sqlite3
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

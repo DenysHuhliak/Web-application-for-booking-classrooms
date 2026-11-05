@@ -1,0 +1,32 @@
+<div class="panel-card map-card">
+    <div class="panel-header">
+        <h2>Факультет математики та інформатики — Схема 3-го поверху</h2>
+        <span id="current-slot-label" class="slot-indicator"></span>
+    </div>
+
+    <div class="panel-body">
+        <div class="floor-map-wrapper">
+            <img src="{{ url_for('static', filename='maps/floor_3.svg') }}" 
+                 alt="Схема 3-го поверху корпусу" 
+                 class="floor-map-svg">
+
+            <div id="map-overlays" class="map-overlays-layer">
+            </div>
+        </div>
+
+        <div class="map-legend">
+            <div class="legend-item">
+                <span class="legend-box status-free"></span>
+                <span>Вільна аудиторія (доступна для бронювання)</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-box status-occupied"></span>
+                <span>Зайнята (доступний запис у чергу очікування)</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-box status-closed"></span>
+                <span>Тимчасово недоступна (ремонт / технічні роботи)</span>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,57 @@
+<div class="panel-card filter-card">
+    <div class="panel-header">
+        <h2>Параметри відбору</h2>
+    </div>
+    <div class="panel-body">
+        <form id="filter-form" class="filter-form">
+            <div class="form-group">
+                <label for="filter-floor">Оберіть поверх корпусу:</label>
+                <select id="filter-floor" class="pnu-input">
+                    <option value="3" selected>3 поверх</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="filter-date">Дата заняття:</label>
+                <input type="date" id="filter-date" class="pnu-input" value="2026-10-28">
+                <div class="date-quick-btns">
+                    <button type="button" id="btn-date-today" class="btn-secondary-sm">Сьогодні</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="filter-slot">Час проведення:</label>
+                <select id="filter-slot" class="pnu-input">
+                    <option value="09:00-10:20" selected>1 пара (09:00 – 10:20)</option>
+                    <option value="10:35-11:55">2 пара (10:35 – 11:55)</option>
+                    <option value="12:20-13:40">3 пара (12:20 – 13:40)</option>
+                    <option value="13:50-15:10">4 пара (13:50 – 15:10)</option>
+                    <option value="15:20-16:40">5 пара (15:20 – 16:40)</option>
+                    <option value="16:50-18:10">6 пара (16:50 – 18:10)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="filter-capacity">Мінімальна кількість місць:</label>
+                <input type="number" id="filter-capacity" class="pnu-input" min="0" max="200" placeholder="Наприклад: 25">
+            </div>
+
+            <div class="form-group">
+                <label>Необхідне обладнання:</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="equipment" value="ПК"> Комп'ютери
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="equipment" value="проєктор"> Мультимедійний проєктор
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn-primary-pnu">Показати аудиторії</button>
+                <button type="button" id="btn-reset-filters" class="btn-outline-pnu">Очистити параметри</button>
+            </div>
+        </form>
+    </div>
+</div>

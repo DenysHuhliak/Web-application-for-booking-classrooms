@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система бронювання аудиторій КНУ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'components/header.html' %}
+
+    <main class="main-container">
+        <div id="view-map" class="workspace-grid">
+            <section class="left-content-column">
+                {% include 'components/floor_map.html' %}
+
+                {% include 'components/room_table.html' %}
+            </section>
+
+            <aside class="right-sidebar-column">
+                {% include 'components/filter_sidebar.html' %}
+            </aside>
+        </div>
+
+        <section id="view-bookings" class="panel-card hidden">
+            <div class="panel-header">
+                <h2>Активні бронювання та черга бронювань</h2>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="pnu-table">
+                        <thead>
+                            <tr>
+                                <th>Аудиторія</th>
+                                <th>Викладач</th>
+                                <th>Призначення заняття</th>
+                                <th>Час проведення</th>
+                                <th>Статус заявки</th>
+                                <th>Дія</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-bookings-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    {% include 'components/booking_modal.html' %}
+
+    {% include 'components/register_modal.html' %}
+
+    {% include 'components/footer.html' %}
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
