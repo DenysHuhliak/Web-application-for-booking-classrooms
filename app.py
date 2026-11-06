@@ -54,7 +54,7 @@ def get_room_by_id(room_id: int):
     return jsonify(room.to_dict()), 200
 
 @app.route("/api/rooms/<int:room_id>/status", methods=["PATCH"])
-@require_roles("admin", "teacher")
+@require_roles("admin")
 def update_room_status(room_id: int):
     data = request.get_json(silent=True) or {}
     if "is_active" not in data:

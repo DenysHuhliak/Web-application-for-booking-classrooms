@@ -175,6 +175,7 @@ function renderRoomsTable(rooms) {
     }
 
     const canBook = canUserBook();
+    const isAdmin = currentUser?.role === "admin";
     tbody.innerHTML = "";
 
     filtered.forEach(room => {
@@ -187,7 +188,9 @@ function renderRoomsTable(rooms) {
             action = `<button class="btn-action-sm ${canBook ? "btn-queue" : "btn-secondary-sm"}">${canBook ? "Стати в чергу" : "Деталі"}</button>`;
         } else if (room.status === "closed") {
             badge = `<span class="badge-status badge-closed">Тимчасово недоступна</span>`;
-            action = `<span style="color:#888; font-size:12px;">Недоступна</span>`;
+            action = isAdmin
+                ? `<button class="btn-action-sm btn-secondary-sm">Керувати</button>`
+                : `<span style="color:#888; font-size:12px;">Недоступна</span>`;
         }
 
         let queueCell = "—";
@@ -216,9 +219,12 @@ function renderRoomsTable(rooms) {
 function openBookingModal(room) {
     selectedRoom = room;
     const canBook = canUserBook();
+    const isAdmin = currentUser?.role === "admin";
     const formEl = $("booking-form");
     const submitBtn = $("modal-submit-btn");
     const occupancyEl = $("modal-occupancy-box");
+    const adminControls = $("admin-room-controls");
+    const toggleStatusBtn = $("btn-toggle-room-status");
 
     $("form-error-msg").classList.add("hidden");
     $("form-purpose").value = "";
@@ -227,6 +233,15 @@ function openBookingModal(room) {
     $("form-room-id").value = room.id;
     $("form-date-display").value = $("filter-date").value;
     $("form-slot-display").value = $("filter-slot").value;
+
+    if (adminControls && toggleStatusBtn) {
+        adminControls.classList.toggle("hidden", !isAdmin);
+        if (isAdmin) {
+            const isClosed = room.status === "closed" || room.is_active === 0;
+            toggleStatusBtn.textContent = isClosed ? "Відкрити аудиторію" : "Закрити на тех. обслуговування";
+            toggleStatusBtn.className = `btn-action-sm ${isClosed ? "btn-book" : "btn-queue"}`;
+        }
+    }
 
     if (room.status === "closed") {
         occupancyEl.className = "occupancy-alert badge-closed";
@@ -254,6 +269,35 @@ function initModalEvents() {
     const closeModal = () => $("booking-modal").classList.add("hidden");
     $("modal-close-btn").onclick = closeModal;
     $("modal-cancel-btn").onclick = closeModal;
+
+    const toggleBtn = $("btn-toggle-room-status");
+    if (toggleBtn) {
+        toggleBtn.onclick = async () => {
+            if (!selectedRoom || currentUser?.role !== "admin") return;
+            const newState = (selectedRoom.status === "closed" || selectedRoom.is_active === 0) ? 1 : 0;
+
+            try {
+                const { ok, status, data } = await apiFetch(`/api/rooms/${selectedRoom.id}/status`, {
+                    method: "PATCH",
+                    body: JSON.stringify({ is_active: newState })
+                });
+                if (!ok) {
+                    if (status === 401) return;
+                    return showToast(data.error || "Не вдалося змінити статус аудиторії.", "error");
+                }
+                showToast(
+                    newState === 1
+                        ? `Аудиторію №${selectedRoom.room_number} відкрито для бронювання!`
+                        : `Аудиторію №${selectedRoom.room_number} зачинено на тех. обслуговування.`,
+                    newState === 1 ? "success" : "warning"
+                );
+                closeModal();
+                loadRoomsData();
+            } catch {
+                showToast("Не вдалося з'єднатися з сервером.", "error");
+            }
+        };
+    }
 
     $("booking-form").onsubmit = async (e) => {
         e.preventDefault();
