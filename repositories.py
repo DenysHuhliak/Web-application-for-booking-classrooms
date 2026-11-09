@@ -1,4 +1,5 @@
 import sqlite3
+from abc import ABC, abstractmethod
 from typing import List, Optional
 from models import User, Room, Booking
 
@@ -26,12 +27,79 @@ def _fetch_all(query: str, params: tuple = ()):
     finally:
         conn.close()
 
+class AbstractUserRepository(ABC):
+    @abstractmethod
+    def create(self, full_name: str, email: str, password_hash: str, role: str) -> User:
+        pass
 
-class UserRepository:
+    @abstractmethod
+    def get_by_id(self, user_id: int) -> Optional[User]:
+        pass
+
+    @abstractmethod
+    def get_by_email(self, email: str) -> Optional[User]:
+        pass
+
+
+class AbstractRoomRepository(ABC):
+    @abstractmethod
+    def get_all_by_floor(self, floor_number: int = 3) -> List[Room]:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, room_id: int) -> Optional[Room]:
+        pass
+
+    @abstractmethod
+    def update_status(self, room_id: int, is_active: int) -> bool:
+        pass
+
+
+class AbstractBookingRepository(ABC):
+    @abstractmethod
+    def get_all(self) -> List[Booking]:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, booking_id: int) -> Optional[Booking]:
+        pass
+
+    @abstractmethod
+    def get_confirmed_for_slot(self, room_id: int, start_dt: str, end_dt: str) -> Optional[dict]:
+        pass
+
+    @abstractmethod
+    def get_user_existing_booking_in_slot(self, room_id: int, user_id: int, start_dt: str, end_dt: str) -> Optional[dict]:
+        pass
+
+    @abstractmethod
+    def count_queued_for_slot(self, room_id: int, start_dt: str, end_dt: str) -> int:
+        pass
+
+    @abstractmethod
+    def get_next_queued_for_slot(self, room_id: int, start_dt: str, end_dt: str) -> Optional[Booking]:
+        pass
+
+    @abstractmethod
+    def create(self, room_id: int, user_id: int, purpose: str, start_time: str, end_time: str, status: str) -> int:
+        pass
+
+    @abstractmethod
+    def update_purpose(self, booking_id: int, purpose: str) -> bool:
+        pass
+
+    @abstractmethod
+    def mark_reminder_sent(self, booking_id: int) -> bool:
+        pass
+
+    @abstractmethod
+    def delete_and_promote_next(self, booking: Booking) -> Optional[int]:
+        pass
+
+class SqliteUserRepository(AbstractUserRepository):
     _SELECT = "SELECT id, full_name, email, role, password_hash FROM users"
 
-    @staticmethod
-    def create(full_name: str, email: str, password_hash: str, role: str) -> User:
+    def create(self, full_name: str, email: str, password_hash: str, role: str) -> User:
         conn = get_db_connection()
         try:
             cur = conn.execute(
@@ -43,18 +111,16 @@ class UserRepository:
         finally:
             conn.close()
 
-    @staticmethod
-    def get_by_id(user_id: int) -> Optional[User]:
-        row = _fetch_one(f"{UserRepository._SELECT} WHERE id = ?", (user_id,))
+    def get_by_id(self, user_id: int) -> Optional[User]:
+        row = _fetch_one(f"{self._SELECT} WHERE id = ?", (user_id,))
         return User(**dict(row)) if row else None
 
-    @staticmethod
-    def get_by_email(email: str) -> Optional[User]:
-        row = _fetch_one(f"{UserRepository._SELECT} WHERE email = ?", (email,))
+    def get_by_email(self, email: str) -> Optional[User]:
+        row = _fetch_one(f"{self._SELECT} WHERE email = ?", (email,))
         return User(**dict(row)) if row else None
 
 
-class RoomRepository:
+class SqliteRoomRepository(AbstractRoomRepository):
     _SELECT = """
         SELECT r.id, r.floor_id, r.room_number, r.capacity,
                r.equipment_description, r.svg_polygon_id, r.is_active,
@@ -63,21 +129,18 @@ class RoomRepository:
         JOIN floors f ON r.floor_id = f.id
     """
 
-    @staticmethod
-    def get_all_by_floor(floor_number: int = 3) -> List[Room]:
+    def get_all_by_floor(self, floor_number: int = 3) -> List[Room]:
         rows = _fetch_all(
-            f"{RoomRepository._SELECT} WHERE f.floor_number = ? ORDER BY r.room_number ASC",
+            f"{self._SELECT} WHERE f.floor_number = ? ORDER BY r.room_number ASC",
             (floor_number,)
         )
         return [Room(**dict(r)) for r in rows]
 
-    @staticmethod
-    def get_by_id(room_id: int) -> Optional[Room]:
-        row = _fetch_one(f"{RoomRepository._SELECT} WHERE r.id = ?", (room_id,))
+    def get_by_id(self, room_id: int) -> Optional[Room]:
+        row = _fetch_one(f"{self._SELECT} WHERE r.id = ?", (room_id,))
         return Room(**dict(row)) if row else None
 
-    @staticmethod
-    def update_status(room_id: int, is_active: int) -> bool:
+    def update_status(self, room_id: int, is_active: int) -> bool:
         conn = get_db_connection()
         try:
             cur = conn.execute("UPDATE rooms SET is_active = ? WHERE id = ?", (is_active, room_id))
@@ -87,7 +150,7 @@ class RoomRepository:
             conn.close()
 
 
-class BookingRepository:
+class SqliteBookingRepository(AbstractBookingRepository):
     _SELECT = """
         SELECT b.id, b.room_id, b.user_id, b.purpose, b.start_time, b.end_time,
                b.status, b.created_at, b.reminder_sent,
@@ -97,20 +160,17 @@ class BookingRepository:
         JOIN users u ON b.user_id = u.id
     """
 
-    @staticmethod
-    def get_all() -> List[Booking]:
+    def get_all(self) -> List[Booking]:
         rows = _fetch_all(
-            f"{BookingRepository._SELECT} WHERE b.status != 'cancelled' ORDER BY b.start_time ASC, b.created_at ASC"
+            f"{self._SELECT} WHERE b.status != 'cancelled' ORDER BY b.start_time ASC, b.created_at ASC"
         )
         return [Booking(**dict(r)) for r in rows]
 
-    @staticmethod
-    def get_by_id(booking_id: int) -> Optional[Booking]:
-        row = _fetch_one(f"{BookingRepository._SELECT} WHERE b.id = ?", (booking_id,))
+    def get_by_id(self, booking_id: int) -> Optional[Booking]:
+        row = _fetch_one(f"{self._SELECT} WHERE b.id = ?", (booking_id,))
         return Booking(**dict(row)) if row else None
 
-    @staticmethod
-    def get_confirmed_for_slot(room_id: int, start_dt: str, end_dt: str) -> Optional[dict]:
+    def get_confirmed_for_slot(self, room_id: int, start_dt: str, end_dt: str) -> Optional[dict]:
         row = _fetch_one("""
             SELECT b.id, b.user_id, b.purpose, b.start_time, b.end_time,
                    u.full_name AS teacher_name
@@ -120,8 +180,7 @@ class BookingRepository:
         """, (room_id, end_dt, start_dt))
         return dict(row) if row else None
 
-    @staticmethod
-    def get_user_existing_booking_in_slot(room_id: int, user_id: int, start_dt: str, end_dt: str) -> Optional[dict]:
+    def get_user_existing_booking_in_slot(self, room_id: int, user_id: int, start_dt: str, end_dt: str) -> Optional[dict]:
         row = _fetch_one("""
             SELECT id, status FROM bookings
             WHERE room_id = ? AND user_id = ? AND status IN ('confirmed', 'queued')
@@ -129,26 +188,23 @@ class BookingRepository:
         """, (room_id, user_id, end_dt, start_dt))
         return dict(row) if row else None
 
-    @staticmethod
-    def count_queued_for_slot(room_id: int, start_dt: str, end_dt: str) -> int:
+    def count_queued_for_slot(self, room_id: int, start_dt: str, end_dt: str) -> int:
         row = _fetch_one("""
             SELECT COUNT(*) AS cnt FROM bookings
             WHERE room_id = ? AND status = 'queued' AND start_time < ? AND end_time > ?
         """, (room_id, end_dt, start_dt))
         return row["cnt"] if row else 0
 
-    @staticmethod
-    def get_next_queued_for_slot(room_id: int, start_dt: str, end_dt: str) -> Optional[Booking]:
+    def get_next_queued_for_slot(self, room_id: int, start_dt: str, end_dt: str) -> Optional[Booking]:
         row = _fetch_one(f"""
-            {BookingRepository._SELECT}
+            {self._SELECT}
             WHERE b.room_id = ? AND b.status = 'queued' AND b.start_time < ? AND b.end_time > ?
             ORDER BY b.created_at ASC, b.id ASC
             LIMIT 1
         """, (room_id, end_dt, start_dt))
         return Booking(**dict(row)) if row else None
 
-    @staticmethod
-    def create(room_id: int, user_id: int, purpose: str, start_time: str, end_time: str, status: str) -> int:
+    def create(self, room_id: int, user_id: int, purpose: str, start_time: str, end_time: str, status: str) -> int:
         conn = get_db_connection()
         try:
             cur = conn.execute("""
@@ -160,8 +216,7 @@ class BookingRepository:
         finally:
             conn.close()
 
-    @staticmethod
-    def update_purpose(booking_id: int, purpose: str) -> bool:
+    def update_purpose(self, booking_id: int, purpose: str) -> bool:
         conn = get_db_connection()
         try:
             cur = conn.execute("UPDATE bookings SET purpose = ? WHERE id = ?", (purpose, booking_id))
@@ -170,8 +225,16 @@ class BookingRepository:
         finally:
             conn.close()
 
-    @staticmethod
-    def delete_and_promote_next(booking: Booking) -> Optional[int]:
+    def mark_reminder_sent(self, booking_id: int) -> bool:
+        conn = get_db_connection()
+        try:
+            cur = conn.execute("UPDATE bookings SET reminder_sent = 1 WHERE id = ?", (booking_id,))
+            conn.commit()
+            return cur.rowcount > 0
+        finally:
+            conn.close()
+
+    def delete_and_promote_next(self, booking: Booking) -> Optional[int]:
         conn = get_db_connection()
         try:
             cur = conn.cursor()
@@ -194,3 +257,7 @@ class BookingRepository:
             return promoted_id
         finally:
             conn.close()
+
+UserRepository: AbstractUserRepository = SqliteUserRepository()
+RoomRepository: AbstractRoomRepository = SqliteRoomRepository()
+BookingRepository: AbstractBookingRepository = SqliteBookingRepository()

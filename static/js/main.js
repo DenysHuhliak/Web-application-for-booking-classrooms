@@ -95,6 +95,16 @@ function clearSession() {
     authToken = null;
     localStorage.removeItem("pnu_user");
     localStorage.removeItem("pnu_token");
+
+    $("login-form")?.reset?.();
+    $("register-form")?.reset?.();
+    ["login-email", "login-password", "reg-fullname", "reg-email", "reg-password"].forEach(id => {
+        if ($(id)) $(id).value = "";
+    });
+    if ($("reg-role")) $("reg-role").selectedIndex = 0;
+    $("login-error-msg")?.classList.add("hidden");
+    $("reg-error-msg")?.classList.add("hidden");
+
     updateHeaderProfileUI();
     setActiveTab(true);
     loadRoomsData();
@@ -311,6 +321,7 @@ function initModalEvents() {
 
         const dateVal = $("filter-date").value;
         const [startT, endT] = $("filter-slot").value.split("-");
+        const notifyCheckbox = document.querySelector('#booking-form input[type="checkbox"]');
 
         try {
             const { ok, status, data } = await apiFetch("/api/bookings", {
@@ -320,7 +331,8 @@ function initModalEvents() {
                     user_id: currentUser.id,
                     purpose,
                     start_time: `${dateVal} ${startT}:00`,
-                    end_time: `${dateVal} ${endT}:00`
+                    end_time: `${dateVal} ${endT}:00`,
+                    notify_email: notifyCheckbox ? notifyCheckbox.checked : true
                 })
             });
             if (!ok) {
@@ -414,6 +426,8 @@ function initAuthModal() {
     const closeModal = () => modal.classList.add("hidden");
 
     const switchTab = (isLogin) => {
+        $("login-form")?.reset?.();
+        $("register-form")?.reset?.();
         $("login-error-msg").classList.add("hidden");
         $("reg-error-msg").classList.add("hidden");
         $("tab-login-btn").className = isLogin ? "btn-primary-pnu" : "btn-outline-pnu";
